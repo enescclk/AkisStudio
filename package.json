@@ -1,16 +1,61 @@
 {
   "name": "akis-studio",
   "version": "1.3.0",
-  "description": "Lucidchart benzeri çevrimdışı masaüstü diyagram editörü",
+  "description": "Free desktop diagram editor for flowcharts, electronics diagrams, and electrical schematics",
   "author": "Enes Can Çelik",
   "license": "UNLICENSED",
   "private": true,
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron ."
+    "dev": "electron .",
+    "build:windows": "electron-builder --win",
+    "build:setup": "electron-builder --win nsis",
+    "build:portable": "electron-builder --win portable"
   },
   "devDependencies": {
-    "electron": "43.4.0"
+    "electron": "43.4.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.enescclk.akisstudio",
+    "productName": "Akış Studio",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "renderer.js",
+      "main.js",
+      "preload.js",
+      "package.json",
+      "js/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "artifactName": "Akis-Studio-Setup-${version}-${arch}.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Akış Studio",
+      "runAfterFinish": true
+    },
+    "portable": {
+      "artifactName": "Akis-Studio-Portable-${version}-${arch}.${ext}"
+    }
   }
 }
