@@ -4,23 +4,21 @@
   const A=window.AkisStudio;
 
   A.powerRole=(node)=>{
-    if(!node){
-      return "";
-    }
+    if(!node)return "";
 
     const text=String(node.text||"")
       .trim()
       .toLocaleUpperCase("tr-TR");
 
     if(
-      node.type==="vcc"||
+      node.type==="vcc" ||
       /\b(VCC|VDD|\+5V|\+3V3|3V3)\b/.test(text)
     ){
       return "vcc";
     }
 
     if(
-      node.type==="ground"||
+      node.type==="ground" ||
       /\b(GND|GROUND|TOPRAK|0V)\b/.test(text)
     ){
       return "ground";
@@ -49,30 +47,22 @@
       ...A.defaults.edge,
       color,
       endArrow:
-        A.isCircuitNode(from)||
-        A.isCircuitNode(to)
+        A.isCircuitNode(from)||A.isCircuitNode(to)
           ? "none"
           : A.defaults.edge.endArrow
     };
   };
 
-  const roundedPath=(points,radius)=>{
+  A.roundedPath=(points,radius)=>{
     if(points.length<3||radius<=0){
-      return (
-        `M `+
-        points
-          .map((point)=>`${point.x} ${point.y}`)
-          .join(" L ")
-      );
+      return `M ${points
+        .map((point)=>`${point.x} ${point.y}`)
+        .join(" L ")}`;
     }
 
     let d=`M ${points[0].x} ${points[0].y}`;
 
-    for(
-      let index=1;
-      index<points.length-1;
-      index+=1
-    ){
+    for(let index=1;index<points.length-1;index+=1){
       const previous=points[index-1];
       const current=points[index];
       const next=points[index+1];
@@ -96,29 +86,17 @@
       );
 
       const before={
-        x:
-          current.x+
-          (previous.x-current.x)/
-          beforeLength*
-          amount,
-        y:
-          current.y+
-          (previous.y-current.y)/
-          beforeLength*
-          amount
+        x:current.x+
+          (previous.x-current.x)/beforeLength*amount,
+        y:current.y+
+          (previous.y-current.y)/beforeLength*amount
       };
 
       const after={
-        x:
-          current.x+
-          (next.x-current.x)/
-          afterLength*
-          amount,
-        y:
-          current.y+
-          (next.y-current.y)/
-          afterLength*
-          amount
+        x:current.x+
+          (next.x-current.x)/afterLength*amount,
+        y:current.y+
+          (next.y-current.y)/afterLength*amount
       };
 
       d+=
@@ -132,13 +110,11 @@
     return `${d} L ${last.x} ${last.y}`;
   };
 
-  A.edgePath=(edge)=>{
+  A.edgePoints=(edge)=>{
     const from=A.getNode(edge.from);
     const to=A.getNode(edge.to);
 
-    if(!from||!to){
-      return "";
-    }
+    if(!from||!to)return [];
 
     const sides=
       edge.fromSide&&edge.toSide
@@ -148,16 +124,82 @@
     const start=A.portPoint(from,sides[0]);
     const end=A.portPoint(to,sides[1]);
 
-    if(edge.routing==="straight"){
-      return (
-        `M ${start.x} ${start.y} `+
-        `L ${end.x} ${end.y}`
+    if(
+      Array.isArray(edge.waypoints) &&
+      edge.waypoints.length
+    ){
+      return [
+        start,
+        ...edge.waypoints.map((point)=>({
+          x:Number(point.x),
+          y:Number(point.y)
+        })),
+        end
+      ];
+    }
+
+    if(
+      edge.routing==="straight" ||
+      edge.routing==="curve"
+    ){
+      return [start,end];
+    }
+
+    if(
+      sides[0]==="left" ||
+      sides[0]==="right"
+    ){
+      const middle=(start.x+end.x)/2;
+
+      return [
+        start,
+        {x:middle,y:start.y},
+        {x:middle,y:end.y},
+        end
+      ];
+    }
+
+    const middle=(start.y+end.y)/2;
+
+    return [
+      start,
+      {x:start.x,y:middle},
+      {x:end.x,y:middle},
+      end
+    ];
+  };
+
+  A.edgePath=(edge)=>{
+    const from=A.getNode(edge.from);
+    const to=A.getNode(edge.to);
+
+    if(!from||!to)return "";
+
+    const sides=
+      edge.fromSide&&edge.toSide
+        ? [edge.fromSide,edge.toSide]
+        : A.bestSides(from,to);
+
+    const start=A.portPoint(from,sides[0]);
+    const end=A.portPoint(to,sides[1]);
+
+    if(
+      Array.isArray(edge.waypoints) &&
+      edge.waypoints.length
+    ){
+      return A.roundedPath(
+        A.edgePoints(edge),
+        Number(edge.cornerRadius||0)
       );
+    }
+
+    if(edge.routing==="straight"){
+      return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
     }
 
     if(edge.routing==="curve"){
       if(
-        sides[0]==="left"||
+        sides[0]==="left" ||
         sides[0]==="right"
       ){
         const offset=Math.max(
@@ -166,9 +208,7 @@
         );
 
         const direction=
-          sides[0]==="right"
-            ? 1
-            : -1;
+          sides[0]==="right" ? 1 : -1;
 
         return (
           `M ${start.x} ${start.y} `+
@@ -184,9 +224,7 @@
       );
 
       const direction=
-        sides[0]==="bottom"
-          ? 1
-          : -1;
+        sides[0]==="bottom" ? 1 : -1;
 
       return (
         `M ${start.x} ${start.y} `+
@@ -196,45 +234,8 @@
       );
     }
 
-    let points;
-
-    if(
-      sides[0]==="left"||
-      sides[0]==="right"
-    ){
-      const middle=(start.x+end.x)/2;
-
-      points=[
-        start,
-        {
-          x:middle,
-          y:start.y
-        },
-        {
-          x:middle,
-          y:end.y
-        },
-        end
-      ];
-    }else{
-      const middle=(start.y+end.y)/2;
-
-      points=[
-        start,
-        {
-          x:start.x,
-          y:middle
-        },
-        {
-          x:end.x,
-          y:middle
-        },
-        end
-      ];
-    }
-
-    return roundedPath(
-      points,
+    return A.roundedPath(
+      A.edgePoints(edge),
       Number(edge.cornerRadius||0)
     );
   };
@@ -245,10 +246,7 @@
 
   A.ensureMarkerVariants=()=>{
     const defs=A.$("#ae-canvas defs");
-
-    if(!defs){
-      return;
-    }
+    if(!defs)return;
 
     [.75,1,1.5,2].forEach((size)=>{
       [
@@ -261,18 +259,13 @@
       ].forEach((type)=>{
         const id=markerId(type,size);
 
-        if(document.getElementById(id)){
-          return;
-        }
+        if(document.getElementById(id))return;
 
-        const source=
-          document.getElementById(
-            `ae-marker-${type}`
-          );
+        const source=document.getElementById(
+          `ae-marker-${type}`
+        );
 
-        if(!source){
-          return;
-        }
+        if(!source)return;
 
         const marker=source.cloneNode(true);
         marker.id=id;
@@ -280,22 +273,14 @@
         marker.setAttribute(
           "markerWidth",
           String(
-            (
-              Number(
-                source.getAttribute("markerWidth")
-              )||8
-            )*size
+            (Number(source.getAttribute("markerWidth"))||8)*size
           )
         );
 
         marker.setAttribute(
           "markerHeight",
           String(
-            (
-              Number(
-                source.getAttribute("markerHeight")
-              )||8
-            )*size
+            (Number(source.getAttribute("markerHeight"))||8)*size
           )
         );
 
@@ -319,23 +304,14 @@
   };
 
   A.nearestSide=(node,point)=>{
-    return [
-      "left",
-      "right",
-      "top",
-      "bottom"
-    ]
-      .map((side)=>{
-        const port=A.portPoint(node,side);
-
-        return {
-          side,
-          distance:Math.hypot(
-            point.x-port.x,
-            point.y-port.y
-          )
-        };
-      })
+    return ["left","right","top","bottom"]
+      .map((side)=>({
+        side,
+        distance:Math.hypot(
+          point.x-A.portPoint(node,side).x,
+          point.y-A.portPoint(node,side).y
+        )
+      }))
       .sort((first,second)=>{
         return first.distance-second.distance;
       })[0].side;
@@ -346,10 +322,7 @@
 
     A.state.edges.forEach((edge)=>{
       const d=A.edgePath(edge);
-
-      if(!d){
-        return;
-      }
+      if(!d)return;
 
       const group=A.el("g",{
         "data-edge-id":edge.id
@@ -362,33 +335,27 @@
 
       const path=A.el("path",{
         class:
-          `ae-edge`+
-          (
-            A.state.selectedEdge===edge.id
+          `ae-edge${
+            A.selectedEdgeIds().includes(edge.id)
               ? " selected"
               : ""
-          ),
+          }`,
         d,
-        stroke:
-          edge.color||
-          A.defaults.edge.color,
-        "stroke-width":
-          edge.width||2,
+        stroke:edge.color||A.defaults.edge.color,
+        "stroke-width":edge.width||2,
         "stroke-linecap":
           edge.lineStyle==="dotted"
             ? "round"
             : "butt",
         "marker-start":
-          edge.startArrow&&
-          edge.startArrow!=="none"
+          edge.startArrow&&edge.startArrow!=="none"
             ? `url(#${markerId(
                 edge.startArrow,
                 edge.endpointSize
               )})`
             : "",
         "marker-end":
-          edge.endArrow&&
-          edge.endArrow!=="none"
+          edge.endArrow&&edge.endArrow!=="none"
             ? `url(#${markerId(
                 edge.endArrow,
                 edge.endpointSize
@@ -411,23 +378,22 @@
 
       group.append(hit,path);
 
-      group.addEventListener(
-        "pointerdown",
-        (event)=>{
-          event.stopPropagation();
+      group.addEventListener("pointerdown",(event)=>{
+        event.stopPropagation();
 
-          A.runtime.lastNodePress={
-            id:null,
-            at:0
-          };
+        A.runtime.lastNodePress={
+          id:null,
+          at:0
+        };
 
-          A.state.selectedEdge=edge.id;
-          A.state.selectedNode=null;
-          A.state.selectedNodes=[];
+        A.state.selectedEdge=edge.id;
+        A.state.selectedEdges=[edge.id];
 
-          A.render();
-        }
-      );
+        A.state.selectedNode=null;
+        A.state.selectedNodes=[];
+
+        A.render();
+      });
 
       A.edgesLayer.append(group);
     });

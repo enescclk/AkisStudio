@@ -13,10 +13,7 @@
     }
 
     if(A.state.connectSource!==id){
-      const from=A.getNode(
-        A.state.connectSource
-      );
-
+      const from=A.getNode(A.state.connectSource);
       const to=A.getNode(id);
 
       if(!from||!to){
@@ -26,8 +23,7 @@
         return;
       }
 
-      const [fromSide,toSide]=
-        A.bestSides(from,to);
+      const [fromSide,toSide]=A.bestSides(from,to);
 
       A.pushHistory();
 
@@ -51,28 +47,18 @@
   };
 
   A.nodePointerDown=(event)=>{
-    if(event.button!==0){
-      return;
-    }
+    if(event.button!==0)return;
 
     event.stopPropagation();
 
-    const id=
-      event.currentTarget.dataset.nodeId;
-
+    const id=event.currentTarget.dataset.nodeId;
     const node=A.getNode(id);
 
-    if(!node){
-      return;
-    }
+    if(!node)return;
 
     if(event.ctrlKey||event.metaKey){
       event.preventDefault();
-
-      A.runtime.lastNodePress={
-        id:null,
-        at:0
-      };
+      A.runtime.lastNodePress={id:null,at:0};
 
       if(!A.state.connectMode){
         A.state.connectMode=true;
@@ -85,29 +71,19 @@
 
     if(event.shiftKey){
       event.preventDefault();
-
-      A.runtime.lastNodePress={
-        id:null,
-        at:0
-      };
+      A.runtime.lastNodePress={id:null,at:0};
 
       const ids=A.selectedNodeIds();
 
       A.setNodeSelection(
         ids.includes(id)
-          ? ids.filter(
-              (item)=>item!==id
-            )
-          : [...ids,id]
+          ?ids.filter((item)=>item!==id)
+          :[...ids,id]
       );
 
+      A.selectInternalEdges();
       A.render();
-
-      A.setStatus(
-        `${A.selectedNodeIds().length} `+
-        `kutu seçildi`
-      );
-
+      A.setStatus(`${A.selectedNodeIds().length} kutu seçildi`);
       return;
     }
 
@@ -119,17 +95,15 @@
 
     A.runtime.lastNodePress=
       doublePress
-        ? {id:null,at:0}
-        : {id,at:now};
+        ?{id:null,at:0}
+        :{id,at:now};
 
     if(doublePress){
       event.preventDefault();
-
       A.runtime.drag=null;
       A.setNodeSelection([id]);
       A.render();
       A.editNode(node);
-
       return;
     }
 
@@ -147,44 +121,41 @@
     const start=A.worldPoint(event);
     const ids=A.selectedNodeIds();
 
-    A.runtime.drag=
-      ids.length>1
-        ? {
-            type:"nodes",
-            ids,
-            start,
-            moved:false,
-            origins:ids.map((nodeId)=>{
-              const item=A.getNode(nodeId);
+    A.runtime.drag=ids.length>1
+      ?{
+          type:"nodes",
+          ids,
+          start,
+          moved:false,
+          origins:ids.map((nodeId)=>{
+            const item=A.getNode(nodeId);
 
-              return {
-                id:nodeId,
-                x:item.x,
-                y:item.y
-              };
-            })
-          }
-        : {
-            type:"node",
-            id,
-            start,
-            originX:node.x,
-            originY:node.y,
-            moved:false
-          };
+            return {
+              id:nodeId,
+              x:item.x,
+              y:item.y
+            };
+          }),
+          edgeOrigins:A.selectedEdgeObjects().map((edge)=>({
+            id:edge.id,
+            waypoints:(edge.waypoints||[])
+              .map((point)=>({...point}))
+          }))
+        }
+      :{
+          type:"node",
+          id,
+          start,
+          originX:node.x,
+          originY:node.y,
+          moved:false
+        };
 
-    A.svg.setPointerCapture(
-      event.pointerId
-    );
-
+    A.svg.setPointerCapture(event.pointerId);
     A.render();
   };
 
-  A.startPortConnect=(
-    event,
-    node,
-    side
-  )=>{
+  A.startPortConnect=(event,node,side)=>{
     event.stopPropagation();
     A.pushHistory();
 
@@ -198,9 +169,7 @@
       current:start
     };
 
-    A.svg.setPointerCapture(
-      event.pointerId
-    );
+    A.svg.setPointerCapture(event.pointerId);
   };
 
   A.startResize=(event,node)=>{
@@ -215,20 +184,16 @@
       h:node.h
     };
 
-    A.svg.setPointerCapture(
-      event.pointerId
-    );
+    A.svg.setPointerCapture(event.pointerId);
   };
 
-  A.startEdgeEndpointDrag=(
-    event,
-    edge,
-    endpoint
-  )=>{
+  A.startEdgeEndpointDrag=(event,edge,endpoint)=>{
     event.stopPropagation();
     event.preventDefault();
-
     A.pushHistory();
+
+    A.state.selectedEdge=edge.id;
+    A.state.selectedEdges=[edge.id];
 
     A.runtime.drag={
       type:"edge-endpoint",
@@ -240,32 +205,105 @@
         fromSide:edge.fromSide,
         toSide:edge.toSide,
         color:edge.color,
-        endArrow:edge.endArrow
+        endArrow:edge.endArrow,
+        waypoints:(edge.waypoints||[])
+          .map((point)=>({...point}))
       }
     };
 
-    A.svg.setPointerCapture(
-      event.pointerId
-    );
+    A.svg.setPointerCapture(event.pointerId);
+  };
+
+  A.startEdgeBendDrag=(event,edge,index)=>{
+    event.stopPropagation();
+    event.preventDefault();
+    A.pushHistory();
+
+    A.state.selectedEdge=edge.id;
+    A.state.selectedEdges=[edge.id];
+
+    A.runtime.drag={
+      type:"edge-bend",
+      edgeId:edge.id,
+      index,
+      moved:false,
+      newPoint:false
+    };
+
+    A.svg.setPointerCapture(event.pointerId);
+  };
+
+  A.startEdgeSegmentDrag=(event,edge,segmentIndex,points)=>{
+    event.stopPropagation();
+    event.preventDefault();
+    A.pushHistory();
+
+    const first=points[segmentIndex];
+    const second=points[segmentIndex+1];
+
+    const midpoint={
+      x:(first.x+second.x)/2,
+      y:(first.y+second.y)/2
+    };
+
+    const waypoints=points
+      .slice(1,-1)
+      .map((point)=>({...point}));
+
+    waypoints.splice(segmentIndex,0,midpoint);
+    edge.waypoints=waypoints;
+
+    A.state.selectedEdge=edge.id;
+    A.state.selectedEdges=[edge.id];
+
+    A.runtime.drag={
+      type:"edge-bend",
+      edgeId:edge.id,
+      index:segmentIndex,
+      moved:false,
+      newPoint:true,
+      originalWaypoints:points
+        .slice(1,-1)
+        .map((point)=>({...point}))
+    };
+
+    A.svg.setPointerCapture(event.pointerId);
+    A.renderEdges();
+    A.renderOverlay();
+  };
+
+  A.removeEdgeBend=(edge,index)=>{
+    if(
+      !edge||
+      !Array.isArray(edge.waypoints)||
+      !edge.waypoints[index]
+    ){
+      return;
+    }
+
+    A.pushHistory();
+    edge.waypoints.splice(index,1);
+
+    if(!edge.waypoints.length){
+      delete edge.waypoints;
+    }
+
+    A.render();
+    A.scheduleSave();
+    A.setStatus("Büküm noktası kaldırıldı");
   };
 
   const pointerMove=(event)=>{
     const drag=A.runtime.drag;
 
-    if(!drag){
-      return;
-    }
+    if(!drag)return;
 
     if(drag.type==="pan"){
       A.state.panX=
-        drag.panX+
-        event.clientX-
-        drag.clientX;
+        drag.panX+event.clientX-drag.clientX;
 
       A.state.panY=
-        drag.panY+
-        event.clientY-
-        drag.clientY;
+        drag.panY+event.clientY-drag.clientY;
 
       A.updateTransform();
       return;
@@ -277,28 +315,22 @@
       const node=A.getNode(drag.id);
 
       node.x=A.snapValue(
-        drag.originX+
-        point.x-
-        drag.start.x
+        drag.originX+point.x-drag.start.x
       );
 
       node.y=A.snapValue(
-        drag.originY+
-        point.y-
-        drag.start.y
+        drag.originY+point.y-drag.start.y
       );
 
       drag.moved=true;
-
-      A.runtime.lastNodePress={
-        id:null,
-        at:0
-      };
+      A.runtime.lastNodePress={id:null,at:0};
 
       A.renderEdges();
       A.renderNodes();
       A.renderOverlay();
-    }else if(drag.type==="nodes"){
+    }
+
+    else if(drag.type==="nodes"){
       const dx=point.x-drag.start.x;
       const dy=point.y-drag.start.y;
 
@@ -306,141 +338,129 @@
         const node=A.getNode(origin.id);
 
         if(node){
-          node.x=A.snapValue(
-            origin.x+dx
-          );
-
-          node.y=A.snapValue(
-            origin.y+dy
-          );
+          node.x=A.snapValue(origin.x+dx);
+          node.y=A.snapValue(origin.y+dy);
         }
       });
 
-      drag.moved=true;
+      (drag.edgeOrigins||[]).forEach((origin)=>{
+        const edge=A.getEdge(origin.id);
 
-      A.runtime.lastNodePress={
-        id:null,
-        at:0
-      };
+        if(!edge||!origin.waypoints.length)return;
+
+        edge.waypoints=origin.waypoints.map((item)=>({
+          x:A.snapValue(item.x+dx),
+          y:A.snapValue(item.y+dy)
+        }));
+      });
+
+      drag.moved=true;
+      A.runtime.lastNodePress={id:null,at:0};
 
       A.renderEdges();
       A.renderNodes();
       A.renderOverlay();
-    }else if(drag.type==="marquee"){
+    }
+
+    else if(drag.type==="marquee"){
       drag.current=point;
 
       const hits=A.nodesInRect(
-        A.normalizedRect(
-          drag.start,
-          drag.current
-        )
+        A.normalizedRect(drag.start,drag.current)
       );
 
       A.setNodeSelection(
         drag.additive
-          ? [...drag.base,...hits]
-          : hits
+          ?[...drag.base,...hits]
+          :hits
       );
 
+      A.selectInternalEdges();
+      A.renderEdges();
       A.renderOverlay();
       A.updateToolbar?.();
-    }else if(drag.type==="resize"){
+    }
+
+    else if(drag.type==="resize"){
       const node=A.getNode(drag.id);
 
       node.w=Math.max(
         70,
-        A.snapValue(
-          drag.w+
-          point.x-
-          drag.start.x
-        )
+        A.snapValue(drag.w+point.x-drag.start.x)
       );
 
       node.h=Math.max(
         40,
-        A.snapValue(
-          drag.h+
-          point.y-
-          drag.start.y
-        )
+        A.snapValue(drag.h+point.y-drag.start.y)
       );
 
       A.renderEdges();
       A.renderNodes();
       A.renderOverlay();
-    }else if(
-      drag.type==="edge-endpoint"
-    ){
-      const edge=A.getEdge(
-        drag.edgeId
-      );
+    }
 
-      if(!edge){
+    else if(drag.type==="edge-bend"){
+      const edge=A.getEdge(drag.edgeId);
+
+      if(!edge||!edge.waypoints?.[drag.index]){
         return;
       }
 
-      const excludedId=
-        drag.endpoint==="start"
-          ? edge.to
-          : edge.from;
+      edge.waypoints[drag.index]={
+        x:A.snapValue(point.x),
+        y:A.snapValue(point.y)
+      };
+
+      drag.moved=true;
+      A.renderEdges();
+      A.renderOverlay();
+    }
+
+    else if(drag.type==="edge-endpoint"){
+      const edge=A.getEdge(drag.edgeId);
+
+      if(!edge)return;
 
       const target=A.hitNode(
         point,
-        excludedId
+        drag.endpoint==="start"
+          ?edge.to
+          :edge.from
       );
 
       if(target){
         if(drag.endpoint==="start"){
           edge.from=target.id;
-
-          edge.fromSide=A.nearestSide(
-            target,
-            point
-          );
-        }else{
+          edge.fromSide=A.nearestSide(target,point);
+        }
+        else{
           edge.to=target.id;
-
-          edge.toSide=A.nearestSide(
-            target,
-            point
-          );
+          edge.toSide=A.nearestSide(target,point);
         }
 
         A.renderEdges();
         A.renderOverlay();
-      }else{
+      }
+
+      else{
         A.renderOverlay();
 
         const from=A.getNode(edge.from);
         const to=A.getNode(edge.to);
 
-        if(!from||!to){
-          return;
-        }
+        if(!from||!to)return;
 
-        const sides=
-          edge.fromSide&&edge.toSide
-            ? [
-                edge.fromSide,
-                edge.toSide
-              ]
-            : A.bestSides(from,to);
+        const sides=edge.fromSide&&edge.toSide
+          ?[edge.fromSide,edge.toSide]
+          :A.bestSides(from,to);
 
-        const fixed=
-          drag.endpoint==="start"
-            ? A.portPoint(to,sides[1])
-            : A.portPoint(from,sides[0]);
+        const fixed=drag.endpoint==="start"
+          ?A.portPoint(to,sides[1])
+          :A.portPoint(from,sides[0]);
 
-        const d=
-          drag.endpoint==="start"
-            ? (
-                `M ${point.x} ${point.y} `+
-                `L ${fixed.x} ${fixed.y}`
-              )
-            : (
-                `M ${fixed.x} ${fixed.y} `+
-                `L ${point.x} ${point.y}`
-              );
+        const d=drag.endpoint==="start"
+          ?`M ${point.x} ${point.y} L ${fixed.x} ${fixed.y}`
+          :`M ${fixed.x} ${fixed.y} L ${point.x} ${point.y}`;
 
         A.overlayLayer.append(
           A.el("path",{
@@ -449,130 +469,83 @@
           })
         );
       }
-    }else if(drag.type==="connect"){
-      drag.current=point;
+    }
 
+    else if(drag.type==="connect"){
+      drag.current=point;
       A.renderOverlay();
 
       A.overlayLayer.append(
         A.el("path",{
           class:"ae-temp-edge",
-          d:
-            `M ${drag.start.x} `+
-            `${drag.start.y} `+
-            `L ${point.x} ${point.y}`
+          d:`M ${drag.start.x} ${drag.start.y} L ${point.x} ${point.y}`
         })
       );
     }
   };
 
   const pointerUp=(event)=>{
-    if(!A.runtime.drag){
-      return;
-    }
+    if(!A.runtime.drag)return;
 
     const completed=A.runtime.drag;
     A.runtime.drag=null;
 
-    if(
-      A.svg.hasPointerCapture(
-        event.pointerId
-      )
-    ){
-      A.svg.releasePointerCapture(
-        event.pointerId
-      );
+    if(A.svg.hasPointerCapture(event.pointerId)){
+      A.svg.releasePointerCapture(event.pointerId);
     }
 
-    A.svg.classList.remove(
-      "is-panning"
-    );
+    A.svg.classList.remove("is-panning");
 
     if(completed.type==="connect"){
       const point=A.worldPoint(event);
-
-      const target=A.hitNode(
-        point,
-        completed.from
-      );
+      const target=A.hitNode(point,completed.from);
 
       if(target){
-        const source=A.getNode(
-          completed.from
-        );
+        const source=A.getNode(completed.from);
 
         A.state.edges.push({
           id:A.uid("e"),
           from:completed.from,
           to:target.id,
           fromSide:completed.side,
-          toSide:A.nearestSide(
-            target,
-            point
-          ),
-          ...A.edgeStyleForNodes(
-            source,
-            target
-          )
+          toSide:A.nearestSide(target,point),
+          ...A.edgeStyleForNodes(source,target)
         });
 
         A.setNodeSelection([target.id]);
-        A.setStatus(
-          "Bağlantı oluşturuldu"
-        );
-      }else{
+        A.setStatus("Bağlantı oluşturuldu");
+      }
+      else{
         A.state.undo.pop();
       }
     }
 
-    if(
-      completed.type===
-      "edge-endpoint"
-    ){
+    if(completed.type==="edge-endpoint"){
       const point=A.worldPoint(event);
-
-      const edge=A.getEdge(
-        completed.edgeId
-      );
+      const edge=A.getEdge(completed.edgeId);
 
       if(edge){
-        const excludedId=
-          completed.endpoint==="start"
-            ? edge.to
-            : edge.from;
-
         const target=A.hitNode(
           point,
-          excludedId
+          completed.endpoint==="start"
+            ?edge.to
+            :edge.from
         );
 
         if(target){
-          if(
-            completed.endpoint===
-            "start"
-          ){
+          if(completed.endpoint==="start"){
             edge.from=target.id;
-
-            edge.fromSide=
-              A.nearestSide(
-                target,
-                point
-              );
-          }else{
+            edge.fromSide=A.nearestSide(target,point);
+          }
+          else{
             edge.to=target.id;
-
-            edge.toSide=
-              A.nearestSide(
-                target,
-                point
-              );
+            edge.toSide=A.nearestSide(target,point);
           }
 
-          const automatic=
-            A.edgeStyleForNodes(
-              A.getNode(edge.from),
-              A.getNode(edge.to)
-            );
+          const automatic=A.edgeStyleForNodes(
+            A.getNode(edge.from),
+            A.getNode(edge.to)
+          );
 
           if([
             A.defaults.edge.color,
@@ -584,58 +557,72 @@
 
           if(
             edge.endArrow==="none"||
-            edge.endArrow===
-              A.defaults.edge.endArrow
+            edge.endArrow===A.defaults.edge.endArrow
           ){
-            edge.endArrow=
-              automatic.endArrow;
+            edge.endArrow=automatic.endArrow;
           }
 
           A.state.selectedNode=null;
           A.state.selectedNodes=[];
           A.state.selectedEdge=edge.id;
+          A.state.selectedEdges=[edge.id];
 
-          A.setStatus(
-            "Bağlantı ucu taşındı"
-          );
-        }else{
-          Object.assign(
-            edge,
-            completed.original
-          );
+          A.setStatus("Bağlantı ucu taşındı");
+        }
 
+        else{
+          Object.assign(edge,completed.original);
           completed.cancelled=true;
           A.state.undo.pop();
-
-          A.setStatus(
-            "Bağlantı eski yerine döndü"
-          );
+          A.setStatus("Bağlantı eski yerine döndü");
         }
       }
     }
 
     if(
-      [
-        "node",
-        "nodes"
-      ].includes(completed.type)&&
+      ["node","nodes"].includes(completed.type)&&
       !completed.moved
     ){
       A.state.undo.pop();
     }
 
+    if(
+      completed.type==="edge-bend"&&
+      !completed.moved
+    ){
+      if(completed.newPoint){
+        const edge=A.getEdge(completed.edgeId);
+
+        if(edge){
+          if(completed.originalWaypoints?.length){
+            edge.waypoints=completed.originalWaypoints
+              .map((point)=>({...point}));
+          }
+          else{
+            delete edge.waypoints;
+          }
+        }
+      }
+
+      A.state.undo.pop();
+    }
+
+    if(
+      completed.type==="edge-bend"&&
+      completed.moved
+    ){
+      A.setStatus("Bağlantı büküldü");
+    }
+
     if(completed.type==="marquee"){
       A.setStatus(
-        `${A.selectedNodeIds().length} `+
-        `kutu seçildi`
+        `${A.selectedNodeIds().length} kutu ve `+
+        `${A.selectedEdgeIds().length} bağlantı seçildi`
       );
     }
 
     if(
-      ![
-        "pan",
-        "marquee"
-      ].includes(completed.type)&&
+      !["pan","marquee"].includes(completed.type)&&
       !completed.cancelled
     ){
       A.scheduleSave();
@@ -644,13 +631,7 @@
     A.render();
   };
 
-  A.addNode=(
-    type,
-    x,
-    y,
-    text="Yeni kutu",
-    extra={}
-  )=>{
+  A.addNode=(type,x,y,text="Yeni kutu",extra={})=>{
     A.pushHistory();
 
     const tall=[
@@ -674,14 +655,14 @@
 
     const size=
       type==="text"
-        ? [150,44]
-        : A.circuitTypes.has(type)
-          ? [120,72]
-          : tall.includes(type)
-            ? [110,90]
-            : arrows.includes(type)
-              ? [120,70]
-              : [130,62];
+        ?[150,44]
+        :A.circuitTypes.has(type)
+          ?[120,72]
+          :tall.includes(type)
+            ?[110,90]
+            :arrows.includes(type)
+              ?[120,70]
+              :[130,62];
 
     const node={
       id:A.uid("n"),
@@ -703,25 +684,12 @@
     return node;
   };
 
-  A.addAtCenter=(
-    type,
-    text,
-    extra={}
-  )=>{
-    const rect=
-      A.shell.getBoundingClientRect();
+  A.addAtCenter=(type,text,extra={})=>{
+    const rect=A.shell.getBoundingClientRect();
 
     const point={
-      x:
-        (
-          rect.width/2-
-          A.state.panX
-        )/A.state.zoom,
-      y:
-        (
-          rect.height/2-
-          A.state.panY
-        )/A.state.zoom
+      x:(rect.width/2-A.state.panX)/A.state.zoom,
+      y:(rect.height/2-A.state.panY)/A.state.zoom
     };
 
     A.addNode(
@@ -734,19 +702,13 @@
   };
 
   A.editNode=(node)=>{
-    if(!node){
-      return;
-    }
+    if(!node)return;
 
-    A.shell
-      .querySelector(
-        ".ae-inline-text-editor"
-      )
-      ?.blur();
+    A.shell.querySelector(
+      ".ae-inline-text-editor"
+    )?.blur();
 
-    const shellRect=
-      A.shell.getBoundingClientRect();
-
+    const shellRect=A.shell.getBoundingClientRect();
     const point=A.screenPoint({
       x:node.x,
       y:node.y
@@ -762,78 +724,52 @@
       node.h*A.state.zoom
     );
 
-    const editor=
-      document.createElement("textarea");
+    const editor=document.createElement("textarea");
 
-    editor.className=
-      "ae-inline-text-editor";
-
+    editor.className="ae-inline-text-editor";
     editor.value=node.text||"";
-
     editor.setAttribute(
       "aria-label",
       "Kutu metni"
     );
-
     editor.title=
-      "Enter: kaydet · "+
-      "Shift+Enter: yeni satır · "+
-      "Esc: iptal";
+      "Enter: kaydet · Shift+Enter: yeni satır · Esc: iptal";
 
     Object.assign(editor.style,{
-      left:
-        `${Math.max(
-          4,
-          Math.min(
-            point.x,
-            shellRect.width-width-4
-          )
-        )}px`,
-      top:
-        `${Math.max(
-          4,
-          Math.min(
-            point.y,
-            shellRect.height-height-4
-          )
-        )}px`,
+      left:`${Math.max(
+        4,
+        Math.min(
+          point.x,
+          shellRect.width-width-4
+        )
+      )}px`,
+      top:`${Math.max(
+        4,
+        Math.min(
+          point.y,
+          shellRect.height-height-4
+        )
+      )}px`,
       width:`${width}px`,
       height:`${height}px`,
       color:node.textColor,
-      fontFamily:
-        node.fontFamily||
-        A.defaults.node.fontFamily,
-      fontSize:
-        `${Math.max(
-          12,
-          node.fontSize*A.state.zoom
-        )}px`,
-      fontWeight:
-        node.bold
-          ? "600"
-          : "400",
-      fontStyle:
-        node.italic
-          ? "italic"
-          : "normal",
-      textAlign:
-        node.textAlign||
-        "center"
+      fontFamily:node.fontFamily||A.defaults.node.fontFamily,
+      fontSize:`${Math.max(
+        12,
+        node.fontSize*A.state.zoom
+      )}px`,
+      fontWeight:node.bold?"600":"400",
+      fontStyle:node.italic?"italic":"normal",
+      textAlign:node.textAlign||"center"
     });
 
     let finished=false;
 
     const finish=(save)=>{
-      if(finished){
-        return;
-      }
-
+      if(finished)return;
       finished=true;
 
-      const next=
-        editor.value.trim()||
-        "Yeni kutu";
-
+      const next=editor.value.trim()||"Yeni kutu";
       editor.remove();
 
       if(!save||next===node.text){
@@ -845,43 +781,34 @@
       node.text=next;
       A.render();
       A.scheduleSave();
-
-      A.setStatus(
-        "Kutu metni güncellendi"
-      );
+      A.setStatus("Kutu metni güncellendi");
     };
 
     editor.addEventListener(
       "pointerdown",
-      (event)=>{
-        event.stopPropagation();
-      }
+      (event)=>event.stopPropagation()
     );
 
-    editor.addEventListener(
-      "keydown",
-      (event)=>{
-        event.stopPropagation();
+    editor.addEventListener("keydown",(event)=>{
+      event.stopPropagation();
 
-        if(event.key==="Escape"){
-          event.preventDefault();
-          finish(false);
-        }else if(
-          event.key==="Enter"&&
-          !event.shiftKey&&
-          !event.isComposing
-        ){
-          event.preventDefault();
-          finish(true);
-        }
+      if(event.key==="Escape"){
+        event.preventDefault();
+        finish(false);
       }
-    );
+      else if(
+        event.key==="Enter"&&
+        !event.shiftKey&&
+        !event.isComposing
+      ){
+        event.preventDefault();
+        finish(true);
+      }
+    });
 
     editor.addEventListener(
       "blur",
-      ()=>{
-        finish(true);
-      }
+      ()=>finish(true)
     );
 
     A.shell.append(editor);
@@ -894,50 +821,40 @@
 
   A.deleteSelection=()=>{
     const ids=A.selectedNodeIds();
+    const edgeIds=A.selectedEdgeIds();
 
-    if(
-      !ids.length&&
-      !A.state.selectedEdge
-    ){
-      return;
-    }
+    if(!ids.length&&!edgeIds.length)return;
 
     A.pushHistory();
 
     if(ids.length){
       const chosen=new Set(ids);
 
-      A.state.nodes=
-        A.state.nodes.filter(
-          (node)=>{
-            return !chosen.has(node.id);
-          }
-        );
+      A.state.nodes=A.state.nodes.filter(
+        (node)=>!chosen.has(node.id)
+      );
 
-      A.state.edges=
-        A.state.edges.filter(
-          (edge)=>{
-            return (
-              !chosen.has(edge.from)&&
-              !chosen.has(edge.to)
-            );
-          }
-        );
+      A.state.edges=A.state.edges.filter(
+        (edge)=>
+          !chosen.has(edge.from)&&
+          !chosen.has(edge.to)
+      );
 
       A.state.selectedNode=null;
       A.state.selectedNodes=[];
-    }else{
-      A.state.edges=
-        A.state.edges.filter(
-          (edge)=>{
-            return (
-              edge.id!==
-              A.state.selectedEdge
-            );
-          }
-        );
+      A.state.selectedEdge=null;
+      A.state.selectedEdges=[];
+    }
+
+    else{
+      const chosenEdges=new Set(edgeIds);
+
+      A.state.edges=A.state.edges.filter(
+        (edge)=>!chosenEdges.has(edge.id)
+      );
 
       A.state.selectedEdge=null;
+      A.state.selectedEdges=[];
     }
 
     A.render();
@@ -946,12 +863,9 @@
   };
 
   A.duplicateSelected=()=>{
-    const nodes=
-      A.selectedNodeObjects();
+    const nodes=A.selectedNodeObjects();
 
-    if(!nodes.length){
-      return;
-    }
+    if(!nodes.length)return;
 
     A.pushHistory();
 
@@ -969,42 +883,35 @@
       return copy;
     });
 
-    const edges=
-      A.state.edges
-        .filter((edge)=>{
-          return (
-            idMap.has(edge.from)&&
-            idMap.has(edge.to)
-          );
-        })
-        .map((edge)=>({
-          ...edge,
-          id:A.uid("e"),
-          from:idMap.get(edge.from),
-          to:idMap.get(edge.to)
-        }));
+    const edges=A.state.edges
+      .filter((edge)=>
+        idMap.has(edge.from)&&
+        idMap.has(edge.to)
+      )
+      .map((edge)=>({
+        ...edge,
+        id:A.uid("e"),
+        from:idMap.get(edge.from),
+        to:idMap.get(edge.to),
+        waypoints:(edge.waypoints||[])
+          .map((point)=>({
+            x:point.x+30,
+            y:point.y+30
+          }))
+      }));
 
     A.state.nodes.push(...copies);
     A.state.edges.push(...edges);
-
-    A.setNodeSelection(
-      copies.map((node)=>node.id)
-    );
-
+    A.setNodeSelection(copies.map((node)=>node.id));
+    A.selectInternalEdges();
     A.render();
     A.scheduleSave();
   };
 
-  A.updateSelected=(
-    property,
-    value
-  )=>{
-    const nodes=
-      A.selectedNodeObjects();
+  A.updateSelected=(property,value)=>{
+    const nodes=A.selectedNodeObjects();
 
-    if(!nodes.length){
-      return;
-    }
+    if(!nodes.length)return;
 
     A.pushHistory();
 
@@ -1016,17 +923,10 @@
     A.scheduleSave();
   };
 
-  A.updateEdge=(
-    property,
-    value
-  )=>{
-    const edge=A.getEdge(
-      A.state.selectedEdge
-    );
+  A.updateEdge=(property,value)=>{
+    const edge=A.getEdge(A.state.selectedEdge);
 
-    if(!edge){
-      return;
-    }
+    if(!edge)return;
 
     A.pushHistory();
     edge[property]=value;
@@ -1035,100 +935,56 @@
   };
 
   A.updateStroke=(value)=>{
-    if(A.selectedNodeIds().length){
-      A.updateSelected(
-        "stroke",
-        value
-      );
-    }else if(A.state.selectedEdge){
-      A.updateEdge(
-        "color",
-        value
-      );
-    }
+    A.selectedNodeIds().length
+      ?A.updateSelected("stroke",value)
+      :A.state.selectedEdge&&A.updateEdge("color",value);
   };
 
   A.updateLineWidth=(
     value,
-    {
-      history=true,
-      save=true,
-      render=true
-    }={}
+    {history=true,save=true,render=true}={}
   )=>{
     const width=Math.max(
       .5,
-      Math.min(
-        50,
-        Number(value)||1
-      )
+      Math.min(50,Number(value)||1)
     );
 
-    const nodes=
-      A.selectedNodeObjects();
+    const nodes=A.selectedNodeObjects();
+    const edge=A.getEdge(A.state.selectedEdge);
 
-    const edge=A.getEdge(
-      A.state.selectedEdge
-    );
+    if(!nodes.length&&!edge)return;
 
-    if(!nodes.length&&!edge){
-      return;
-    }
-
-    if(history){
-      A.pushHistory();
-    }
+    if(history)A.pushHistory();
 
     nodes.forEach((node)=>{
       node.strokeWidth=width;
     });
 
-    if(edge){
-      edge.width=width;
-    }
+    if(edge)edge.width=width;
 
     A.syncLineWidthControls?.(width);
 
-    if(render){
-      A.render();
-    }
-
-    if(save){
-      A.scheduleSave();
-    }
+    if(render)A.render();
+    if(save)A.scheduleSave();
   };
 
   A.updateCornerRadius=(value)=>{
-    if(A.selectedNodeIds().length){
-      A.updateSelected(
-        "cornerRadius",
-        value
-      );
-    }else if(A.state.selectedEdge){
-      A.updateEdge(
-        "cornerRadius",
-        value
-      );
-    }
+    A.selectedNodeIds().length
+      ?A.updateSelected("cornerRadius",value)
+      :A.state.selectedEdge&&A.updateEdge("cornerRadius",value);
   };
 
   A.autoLayout=()=>{
-    if(A.state.nodes.length<2){
-      return;
-    }
+    if(A.state.nodes.length<2)return;
 
     A.pushHistory();
 
     const incoming=new Map(
-      A.state.nodes.map(
-        (node)=>[node.id,0]
-      )
+      A.state.nodes.map((node)=>[node.id,0])
     );
 
     const outgoing=new Map(
-      A.state.nodes.map(
-        (node)=>[node.id,[]]
-      )
+      A.state.nodes.map((node)=>[node.id,[]])
     );
 
     A.state.edges.forEach((edge)=>{
@@ -1141,23 +997,17 @@
           incoming.get(edge.to)+1
         );
 
-        outgoing
-          .get(edge.from)
-          .push(edge.to);
+        outgoing.get(edge.from).push(edge.to);
       }
     });
 
     const level=new Map();
 
     const queue=A.state.nodes
-      .filter((node)=>{
-        return incoming.get(node.id)===0;
-      })
+      .filter((node)=>incoming.get(node.id)===0)
       .map((node)=>node.id);
 
-    queue.forEach((id)=>{
-      level.set(id,0);
-    });
+    queue.forEach((id)=>level.set(id,0));
 
     while(queue.length){
       const id=queue.shift();
@@ -1203,99 +1053,79 @@
     [...columns.keys()]
       .sort((a,b)=>a-b)
       .forEach((current)=>{
-        columns
-          .get(current)
-          .forEach((node,index)=>{
-            node.x=100+current*230;
-            node.y=100+index*115;
-          });
+        columns.get(current).forEach((node,index)=>{
+          node.x=100+current*230;
+          node.y=100+index*115;
+        });
       });
+
+    A.state.edges.forEach((edge)=>{
+      delete edge.waypoints;
+    });
 
     A.render();
     A.fitDiagram();
     A.scheduleSave();
-
-    A.setStatus(
-      "Diyagram otomatik dizildi"
-    );
+    A.setStatus("Diyagram otomatik dizildi");
   };
 
   A.registerInteractions=()=>{
-    A.svg.addEventListener(
-      "pointerdown",
-      (event)=>{
-        if(
-          event.target.closest?.(
-            "[data-node-id],"+
-            "[data-edge-id],"+
-            "[data-port],"+
-            "[data-edge-endpoint]"
-          )
-        ){
-          return;
-        }
+    A.svg.addEventListener("pointerdown",(event)=>{
+      if(
+        event.target.closest?.(
+          "[data-node-id],[data-edge-id],[data-port],[data-edge-endpoint]"
+        )
+      ){
+        return;
+      }
 
-        A.runtime.lastNodePress={
-          id:null,
-          at:0
+      A.runtime.lastNodePress={id:null,at:0};
+
+      if(A.state.connectMode){
+        A.state.connectSource=null;
+        A.state.connectMode=false;
+        A.updateToolbar();
+        return;
+      }
+
+      if(event.button===1||A.runtime.spaceDown){
+        A.runtime.drag={
+          type:"pan",
+          clientX:event.clientX,
+          clientY:event.clientY,
+          panX:A.state.panX,
+          panY:A.state.panY
         };
 
-        if(A.state.connectMode){
-          A.state.connectSource=null;
-          A.state.connectMode=false;
-          A.updateToolbar();
-          return;
-        }
-
-        if(
-          event.button===1||
-          A.runtime.spaceDown
-        ){
-          A.runtime.drag={
-            type:"pan",
-            clientX:event.clientX,
-            clientY:event.clientY,
-            panX:A.state.panX,
-            panY:A.state.panY
-          };
-
-          A.svg.classList.add(
-            "is-panning"
-          );
-
-          A.svg.setPointerCapture(
-            event.pointerId
-          );
-        }else if(event.button===0){
-          const start=
-            A.worldPoint(event);
-
-          const base=event.shiftKey
-            ? A.selectedNodeIds()
-            : [];
-
-          if(!event.shiftKey){
-            A.setNodeSelection([]);
-          }
-
-          A.state.selectedEdge=null;
-
-          A.runtime.drag={
-            type:"marquee",
-            start,
-            current:start,
-            base,
-            additive:event.shiftKey
-          };
-
-          A.svg.setPointerCapture(
-            event.pointerId
-          );
-        }
-
-        A.render();
+        A.svg.classList.add("is-panning");
+        A.svg.setPointerCapture(event.pointerId);
       }
-    );
+
+      else if(event.button===0){
+        const start=A.worldPoint(event);
+        const base=event.shiftKey
+          ?A.selectedNodeIds()
+          :[];
+
+        if(!event.shiftKey){
+          A.setNodeSelection([]);
+        }
+
+        A.state.selectedEdge=null;
+
+        A.runtime.drag={
+          type:"marquee",
+          start,
+          current:start,
+          base,
+          additive:event.shiftKey
+        };
+
+        A.svg.setPointerCapture(event.pointerId);
+      }
+
+      A.render();
+    });
 
     A.svg.addEventListener(
       "pointermove",
@@ -1312,284 +1142,263 @@
       pointerUp
     );
 
-    A.svg.addEventListener(
-      "dblclick",
-      (event)=>{
-        if(
-          event.target===A.svg||
-          event.target.id==="ae-grid"
-        ){
-          const point=
-            A.worldPoint(event);
-
-          A.addNode(
-            "rect",
-            point.x-65,
-            point.y-31
-          );
-        }
+    A.svg.addEventListener("dblclick",(event)=>{
+      if(
+        event.target===A.svg||
+        event.target.id==="ae-grid"
+      ){
+        const point=A.worldPoint(event);
+        A.addNode(
+          "rect",
+          point.x-65,
+          point.y-31
+        );
       }
-    );
+    });
 
     A.svg.addEventListener(
       "wheel",
       (event)=>{
         event.preventDefault();
-
         A.zoomAt(
-          event.deltaY<0 ? 1.1 : .9,
+          event.deltaY<0?1.1:.9,
           event.clientX,
           event.clientY
         );
       },
-      {
-        passive:false
-      }
+      {passive:false}
     );
 
     A.shell.addEventListener(
       "dragover",
-      (event)=>{
-        event.preventDefault();
-      }
+      (event)=>event.preventDefault()
     );
 
-    A.shell.addEventListener(
-      "drop",
-      (event)=>{
+    A.shell.addEventListener("drop",(event)=>{
+      event.preventDefault();
+
+      const type=event.dataTransfer.getData(
+        "application/x-akis-shape"
+      );
+
+      if(type){
+        const point=A.worldPoint(event);
+
+        A.addNode(
+          type,
+          point.x-65,
+          point.y-31,
+          A.defaultShapeText[type]??"Yeni kutu"
+        );
+      }
+    });
+
+    A.root.addEventListener("keydown",(event)=>{
+      const editing=[
+        "INPUT",
+        "SELECT",
+        "TEXTAREA"
+      ].includes(document.activeElement.tagName);
+
+      const mod=event.ctrlKey||event.metaKey;
+
+      if(event.code==="Space"&&!editing){
+        A.runtime.spaceDown=true;
+        event.preventDefault();
+      }
+
+      if(editing)return;
+
+      if(
+        event.key==="Delete"||
+        event.key==="Backspace"
+      ){
+        event.preventDefault();
+        A.deleteSelection();
+      }
+
+      else if(
+        mod&&
+        event.key.toLowerCase()==="z"
+      ){
+        event.preventDefault();
+        event.shiftKey?A.redo():A.undo();
+      }
+
+      else if(
+        mod&&
+        event.key.toLowerCase()==="y"
+      ){
+        event.preventDefault();
+        A.redo();
+      }
+
+      else if(
+        mod&&
+        event.key.toLowerCase()==="d"
+      ){
+        event.preventDefault();
+        A.duplicateSelected();
+      }
+
+      else if(
+        mod&&
+        event.key.toLowerCase()==="a"
+      ){
         event.preventDefault();
 
-        const type=
-          event.dataTransfer.getData(
-            "application/x-akis-shape"
-          );
-
-        if(type){
-          const point=
-            A.worldPoint(event);
-
-          A.addNode(
-            type,
-            point.x-65,
-            point.y-31,
-            A.defaultShapeText[type]??
-              "Yeni kutu"
-          );
-        }
-      }
-    );
-
-    A.root.addEventListener(
-      "keydown",
-      (event)=>{
-        const editing=[
-          "INPUT",
-          "SELECT",
-          "TEXTAREA"
-        ].includes(
-          document.activeElement.tagName
+        A.setNodeSelection(
+          A.state.nodes.map((node)=>node.id)
         );
 
-        const mod=
-          event.ctrlKey||
-          event.metaKey;
+        A.selectInternalEdges();
+        A.render();
 
-        if(
-          event.code==="Space"&&
-          !editing
-        ){
-          A.runtime.spaceDown=true;
-          event.preventDefault();
-        }
+        A.setStatus(
+          `${A.state.nodes.length} kutu ve `+
+          `${A.selectedEdgeIds().length} bağlantı seçildi`
+        );
+      }
 
-        if(editing){
-          return;
-        }
+      else if(
+        mod&&
+        event.key.toLowerCase()==="c"
+      ){
+        const nodes=A.selectedNodeObjects();
+        const chosen=new Set(
+          nodes.map((node)=>node.id)
+        );
 
-        if(
-          event.key==="Delete"||
-          event.key==="Backspace"
-        ){
-          event.preventDefault();
-          A.deleteSelection();
-        }else if(
-          mod&&
-          event.key.toLowerCase()==="z"
-        ){
-          event.preventDefault();
-
-          if(event.shiftKey){
-            A.redo();
-          }else{
-            A.undo();
-          }
-        }else if(
-          mod&&
-          event.key.toLowerCase()==="y"
-        ){
-          event.preventDefault();
-          A.redo();
-        }else if(
-          mod&&
-          event.key.toLowerCase()==="d"
-        ){
-          event.preventDefault();
-          A.duplicateSelected();
-        }else if(
-          mod&&
-          event.key.toLowerCase()==="a"
-        ){
-          event.preventDefault();
-
-          A.setNodeSelection(
-            A.state.nodes.map(
-              (node)=>node.id
-            )
-          );
-
-          A.render();
-
-          A.setStatus(
-            `${A.state.nodes.length} `+
-            `kutu seçildi`
-          );
-        }else if(
-          mod&&
-          event.key.toLowerCase()==="c"
-        ){
-          const nodes=
-            A.selectedNodeObjects();
-
-          const chosen=new Set(
-            nodes.map((node)=>node.id)
-          );
-
-          if(nodes.length){
-            A.runtime.clipboard={
-              nodes:nodes.map(
-                (node)=>({...node})
-              ),
-              edges:A.state.edges
-                .filter((edge)=>{
-                  return (
-                    chosen.has(edge.from)&&
-                    chosen.has(edge.to)
-                  );
-                })
-                .map(
-                  (edge)=>({...edge})
-                )
-            };
-          }
-        }else if(
-          mod&&
-          event.key.toLowerCase()==="v"&&
-          A.runtime.clipboard?.nodes?.length
-        ){
-          A.pushHistory();
-
-          const idMap=new Map();
-
-          const nodes=
-            A.runtime.clipboard.nodes
-              .map((node)=>{
-                const copy={
-                  ...node,
-                  id:A.uid("n"),
-                  x:node.x+35,
-                  y:node.y+35
-                };
-
-                idMap.set(
-                  node.id,
-                  copy.id
-                );
-
-                return copy;
-              });
-
-          const edges=
-            (
-              A.runtime.clipboard.edges||
-              []
-            ).map((edge)=>({
-              ...edge,
-              id:A.uid("e"),
-              from:idMap.get(edge.from),
-              to:idMap.get(edge.to)
-            }));
-
-          A.state.nodes.push(...nodes);
-          A.state.edges.push(...edges);
-
-          A.setNodeSelection(
-            nodes.map((node)=>node.id)
-          );
-
+        if(nodes.length){
           A.runtime.clipboard={
-            nodes:nodes.map(
-              (node)=>({...node})
-            ),
-            edges:edges.map(
-              (edge)=>({...edge})
-            )
+            nodes:nodes.map((node)=>({...node})),
+            edges:A.state.edges
+              .filter((edge)=>
+                chosen.has(edge.from)&&
+                chosen.has(edge.to)
+              )
+              .map((edge)=>({
+                ...edge,
+                waypoints:(edge.waypoints||[])
+                  .map((point)=>({...point}))
+              }))
           };
-
-          A.render();
-          A.scheduleSave();
-        }else if(
-          mod&&
-          event.key==="0"
-        ){
-          event.preventDefault();
-          A.fitDiagram();
-        }else if(
-          event.key==="Escape"
-        ){
-          A.state.connectMode=false;
-          A.state.connectSource=null;
-          A.runtime.drag=null;
-          A.closeDropdowns?.();
-          A.render();
-        }else if(
-          [
-            "ArrowLeft",
-            "ArrowRight",
-            "ArrowUp",
-            "ArrowDown"
-          ].includes(event.key)&&
-          A.selectedNodeIds().length
-        ){
-          event.preventDefault();
-          A.pushHistory();
-
-          const step=
-            event.shiftKey ? 10 : 1;
-
-          A.selectedNodeObjects()
-            .forEach((node)=>{
-              if(event.key==="ArrowLeft"){
-                node.x-=step;
-              }
-
-              if(event.key==="ArrowRight"){
-                node.x+=step;
-              }
-
-              if(event.key==="ArrowUp"){
-                node.y-=step;
-              }
-
-              if(event.key==="ArrowDown"){
-                node.y+=step;
-              }
-            });
-
-          A.render();
-          A.scheduleSave();
         }
       }
-    );
+
+      else if(
+        mod&&
+        event.key.toLowerCase()==="v"&&
+        A.runtime.clipboard?.nodes?.length
+      ){
+        A.pushHistory();
+
+        const idMap=new Map();
+
+        const nodes=A.runtime.clipboard.nodes.map((node)=>{
+          const copy={
+            ...node,
+            id:A.uid("n"),
+            x:node.x+35,
+            y:node.y+35
+          };
+
+          idMap.set(node.id,copy.id);
+          return copy;
+        });
+
+        const edges=(A.runtime.clipboard.edges||[])
+          .map((edge)=>({
+            ...edge,
+            id:A.uid("e"),
+            from:idMap.get(edge.from),
+            to:idMap.get(edge.to),
+            waypoints:(edge.waypoints||[])
+              .map((point)=>({
+                x:point.x+35,
+                y:point.y+35
+              }))
+          }));
+
+        A.state.nodes.push(...nodes);
+        A.state.edges.push(...edges);
+        A.setNodeSelection(
+          nodes.map((node)=>node.id)
+        );
+        A.selectInternalEdges();
+
+        A.runtime.clipboard={
+          nodes:nodes.map((node)=>({...node})),
+          edges:edges.map((edge)=>({
+            ...edge,
+            waypoints:(edge.waypoints||[])
+              .map((point)=>({...point}))
+          }))
+        };
+
+        A.render();
+        A.scheduleSave();
+      }
+
+      else if(mod&&event.key==="0"){
+        event.preventDefault();
+        A.fitDiagram();
+      }
+
+      else if(event.key==="Escape"){
+        A.state.connectMode=false;
+        A.state.connectSource=null;
+        A.runtime.drag=null;
+        A.closeDropdowns?.();
+        A.render();
+      }
+
+      else if(
+        [
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown"
+        ].includes(event.key)&&
+        A.selectedNodeIds().length
+      ){
+        event.preventDefault();
+        A.pushHistory();
+
+        const step=event.shiftKey?10:1;
+
+        const dx=
+          event.key==="ArrowLeft"
+            ?-step
+            :event.key==="ArrowRight"
+              ?step
+              :0;
+
+        const dy=
+          event.key==="ArrowUp"
+            ?-step
+            :event.key==="ArrowDown"
+              ?step
+              :0;
+
+        A.selectedNodeObjects().forEach((node)=>{
+          node.x+=dx;
+          node.y+=dy;
+        });
+
+        A.selectedEdgeObjects().forEach((edge)=>{
+          if(edge.waypoints?.length){
+            edge.waypoints=edge.waypoints.map((point)=>({
+              x:point.x+dx,
+              y:point.y+dy
+            }));
+          }
+        });
+
+        A.render();
+        A.scheduleSave();
+      }
+    });
 
     A.root.addEventListener(
       "keyup",
