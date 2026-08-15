@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Akış Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="akis-studio">
+  <header class="ae-topbar">
+    <div class="ae-brand" aria-label="Akış Studio">
+      <span class="ae-logo">A</span>
+      <span>Akış Studio</span>
+    </div>
+    <label class="sr-only" for="ae-doc-name">Belge adı</label>
+    <input id="ae-doc-name" class="form-control ae-doc-name" value="Robot Projesi" autocomplete="off">
+    <span id="ae-save-state" class="text-small text-muted">Yerel yedek hazır</span>
+    <div class="ae-top-actions">
+      <button type="button" class="btn btn-ghost" id="ae-new"><span class="ae-glyph" aria-hidden="true">＋</span> Yeni</button>
+      <button type="button" class="btn btn-ghost" id="ae-import"><span class="ae-glyph" aria-hidden="true">▣</span> Aç</button>
+      <button type="button" class="btn" id="ae-save"><span class="ae-glyph" aria-hidden="true">▾</span> Kaydet</button>
+      <button type="button" class="btn btn-ghost" id="ae-save-as">Farklı kaydet</button>
+      <button type="button" class="btn btn-primary" id="ae-export"><span class="ae-glyph" aria-hidden="true">▧</span> Dışa aktar</button>
+      <label class="ae-theme-control" for="ae-theme">
+        <span class="ae-glyph" aria-hidden="true">◐</span>
+        <select id="ae-theme" class="form-select" aria-label="Tema">
+          <option value="system">Sistem</option>
+          <option value="light">Açık</option>
+          <option value="dark">Koyu</option>
+        </select>
+      </label>
+      <input id="ae-file-input" class="sr-only" type="file" accept=".akis,.json,application/json">
+    </div>
+  </header>
+
+  <div class="ae-formatbar" aria-label="Düzenleme araçları">
+    <div class="ae-toolgroup">
+      <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-undo" aria-label="Geri al"><span class="ae-glyph" aria-hidden="true">↶</span></button>
+      <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-redo" aria-label="Yinele"><span class="ae-glyph" aria-hidden="true">↷</span></button>
+    </div>
+    <div class="ae-separator"></div>
+
+    <select id="ae-font-family" class="form-select ae-font-select" aria-label="Yazı tipi">
+      <option value="Inter, Segoe UI, sans-serif">Inter</option>
+      <option value="Arial, sans-serif">Arial</option>
+      <option value="Calibri, sans-serif">Calibri</option>
+      <option value="Georgia, serif">Georgia</option>
+      <option value="Consolas, monospace">Consolas</option>
+    </select>
+    <select id="ae-font-size" class="form-select ae-size-select" aria-label="Yazı boyutu">
+      <option>10</option><option>12</option><option selected>14</option><option>16</option><option>18</option><option>22</option><option>28</option><option>36</option>
+    </select>
+    <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-bold" aria-label="Kalın" aria-pressed="false"><strong>B</strong></button>
+    <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-italic" aria-label="İtalik" aria-pressed="false"><em>I</em></button>
+    <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-underline" aria-label="Altı çizili" aria-pressed="false"><u>U</u></button>
+    <label class="ae-color-tool" aria-label="Yazı rengi"><span>A</span><input id="ae-text-color" type="color" value="#172033"></label>
+
+    <details class="ae-dropdown" id="ae-align-menu">
+      <summary class="btn btn-ghost ae-icon-btn" aria-label="Metin hizalama"><span class="ae-glyph" aria-hidden="true">≡</span></summary>
+      <div class="ae-popover ae-align-popover">
+        <span class="ae-popover-title">Yatay hizalama</span>
+        <div class="ae-option-grid ae-option-grid-3">
+          <button class="btn btn-ghost" type="button" data-text-align="left" aria-label="Sola hizala">≡</button>
+          <button class="btn btn-ghost" type="button" data-text-align="center" aria-label="Ortala">≣</button>
+          <button class="btn btn-ghost" type="button" data-text-align="right" aria-label="Sağa hizala">≡</button>
+        </div>
+        <span class="ae-popover-title">Dikey hizalama</span>
+        <div class="ae-option-grid ae-option-grid-3">
+          <button class="btn btn-ghost" type="button" data-vertical-align="top">Üst</button>
+          <button class="btn btn-ghost" type="button" data-vertical-align="middle">Orta</button>
+          <button class="btn btn-ghost" type="button" data-vertical-align="bottom">Alt</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="ae-separator"></div>
+    <label class="ae-color-tool" aria-label="Dolgu rengi"><span>●</span><input id="ae-fill" type="color" value="#ffffff"></label>
+    <label class="ae-color-tool" aria-label="Çizgi rengi"><span>◯</span><input id="ae-stroke" type="color" value="#475569"></label>
+    <select id="ae-line-width" class="form-select ae-size-select" aria-label="Çizgi kalınlığı">
+      <option value="1">1 px</option><option value="1.5">1.5 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option>
+    </select>
+
+    <details class="ae-dropdown" id="ae-line-menu">
+      <summary class="btn btn-ghost" aria-label="Çizgi biçimi"><span class="ae-line-sample solid"></span><span class="ae-glyph">⌄</span></summary>
+      <div class="ae-popover ae-line-popover">
+        <span class="ae-popover-title">Çizgi biçimi</span>
+        <div class="ae-line-options">
+          <button class="btn btn-ghost" type="button" data-line-style="solid"><span class="ae-line-sample solid"></span> Düz</button>
+          <button class="btn btn-ghost" type="button" data-line-style="dashed"><span class="ae-line-sample dashed"></span> Kesikli</button>
+          <button class="btn btn-ghost" type="button" data-line-style="dotted"><span class="ae-line-sample dotted"></span> Noktalı</button>
+          <button class="btn btn-ghost" type="button" data-line-style="dashdot"><span class="ae-line-sample dashdot"></span> Çizgi-nokta</button>
+        </div>
+        <label class="form-label ae-popover-field">Köşe yarıçapı
+          <input id="ae-corner-radius" class="form-control" type="number" min="0" max="40" step="2" value="6">
+        </label>
+      </div>
+    </details>
+
+    <details class="ae-dropdown" id="ae-routing-menu">
+      <summary class="btn btn-ghost" aria-label="Bağlantı yolu"><span class="ae-glyph" aria-hidden="true">⌝</span><span class="ae-glyph">⌄</span></summary>
+      <div class="ae-popover ae-routing-popover">
+        <span class="ae-popover-title">Bağlantı yolu</span>
+        <button class="btn btn-ghost" type="button" data-routing="straight">↗ Düz</button>
+        <button class="btn btn-ghost" type="button" data-routing="curve">⌒ Eğri</button>
+        <button class="btn btn-ghost" type="button" data-routing="orthogonal">⌝ Köşeli</button>
+      </div>
+    </details>
+
+    <details class="ae-dropdown" id="ae-arrow-menu">
+      <summary class="btn btn-ghost" aria-label="Ok uçları"><span class="ae-glyph" aria-hidden="true">→</span><span class="ae-glyph">⌄</span></summary>
+      <div class="ae-popover ae-arrow-popover">
+        <label class="form-label">Başlangıç ucu
+          <select id="ae-start-arrow" class="form-select">
+            <option value="none">Yok</option><option value="arrow">Ok</option><option value="open">Açık ok</option><option value="triangle">Üçgen</option><option value="diamond">Elmas</option><option value="circle">Daire</option><option value="bar">Çizgi</option>
+          </select>
+        </label>
+        <label class="form-label">Bitiş ucu
+          <select id="ae-end-arrow" class="form-select">
+            <option value="none">Yok</option><option value="arrow" selected>Ok</option><option value="open">Açık ok</option><option value="triangle">Üçgen</option><option value="diamond">Elmas</option><option value="circle">Daire</option><option value="bar">Çizgi</option>
+          </select>
+        </label>
+        <label class="form-label">Uç boyutu
+          <select id="ae-endpoint-size" class="form-select">
+            <option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <div class="ae-separator"></div>
+    <button type="button" class="btn" id="ae-connect" aria-pressed="false"><span class="ae-glyph" aria-hidden="true">↗</span> Bağla</button>
+    <button type="button" class="btn btn-ghost" id="ae-layout"><span class="ae-glyph" aria-hidden="true">⌘</span> Otomatik diz</button>
+    <button type="button" class="btn btn-ghost" id="ae-grid-toggle" aria-pressed="true"><span class="ae-glyph" aria-hidden="true">#</span> Izgara</button>
+    <label class="form-check form-switch ae-snap">
+      <input id="ae-snap" class="form-check-input" type="checkbox" checked>
+      <span class="form-check-label">Hizala</span>
+    </label>
+  </div>
+
+  <div class="ae-body">
+    <aside id="ae-palette" class="ae-palette" aria-label="Şekil kitaplığı">
+      <div class="ae-palette-head">
+        <h2>Şekiller</h2>
+        <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-collapse-palette" aria-label="Şekil panelini kapat" aria-expanded="true" title="Paneli kapat (Ctrl+Shift+B)"><span class="ae-glyph" aria-hidden="true">‹</span></button>
+      </div>
+      <label class="ae-shape-search"><span aria-hidden="true">⌕</span><input id="ae-shape-search" class="form-control" placeholder="Şekil ara"></label>
+
+      <section class="ae-palette-section">
+        <h3>Kullanılan şekiller</h3>
+        <div class="ae-shape-grid ae-shape-grid-compact">
+          <button class="ae-shape" type="button" draggable="true" data-shape="rect" aria-label="Dikdörtgen"><span class="shape-preview rect"></span><span>Dikdörtgen</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="rounded" aria-label="Yuvarlak"><span class="shape-preview rounded"></span><span>Yuvarlak</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="diamond" aria-label="Karar"><span class="shape-preview diamond"></span><span>Karar</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="ellipse" aria-label="Elips"><span class="shape-preview ellipse"></span><span>Elips</span></button>
+        </div>
+      </section>
+
+      <details class="ae-library" open>
+        <summary>Standart <span>⌃</span></summary>
+        <div class="ae-shape-grid ae-shape-grid-compact">
+          <button class="ae-shape" type="button" draggable="true" data-shape="text" aria-label="Metin"><span class="shape-preview text">T</span><span>Metin</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="rect" aria-label="Dikdörtgen"><span class="shape-preview rect"></span><span>Kutu</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="note" aria-label="Not"><span class="shape-preview note"></span><span>Not</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="arrow-right" aria-label="Ok"><span class="shape-preview arrow-right">→</span><span>Ok</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="code" aria-label="Kod"><span class="shape-preview text">&lt;/&gt;</span><span>Kod</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="predefined" aria-label="Ön tanımlı işlem"><span class="shape-preview predefined"></span><span>İşlem</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="table" aria-label="Tablo"><span class="shape-preview table-shape">▦</span><span>Tablo</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="lightning" aria-label="Yıldırım"><span class="shape-preview text">ϟ</span><span>Sinyal</span></button>
+        </div>
+      </details>
+
+      <details class="ae-library" open>
+        <summary>Akış Şeması <span>⌃</span></summary>
+        <div class="ae-shape-grid ae-shape-grid-compact">
+          <button class="ae-shape" type="button" draggable="true" data-shape="rect" aria-label="İşlem"><span class="shape-preview rect"></span><span>İşlem</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="diamond" aria-label="Karar"><span class="shape-preview diamond"></span><span>Karar</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="terminator" aria-label="Başlangıç bitiş"><span class="shape-preview terminator"></span><span>Başla/Bitir</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="predefined" aria-label="Ön tanımlı işlem"><span class="shape-preview predefined"></span><span>Alt işlem</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="document" aria-label="Belge"><span class="shape-preview document"></span><span>Belge</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="parallelogram" aria-label="Girdi çıktı"><span class="shape-preview parallelogram"></span><span>Girdi</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="hexagon" aria-label="Hazırlık"><span class="shape-preview hexagon"></span><span>Hazırlık</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="trapezoid" aria-label="Manuel işlem"><span class="shape-preview trapezoid"></span><span>Manuel</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="cylinder" aria-label="Veritabanı"><span class="shape-preview cylinder"></span><span>Veri</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="delay" aria-label="Gecikme"><span class="shape-preview delay"></span><span>Gecikme</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="triangle" aria-label="Üçgen"><span class="shape-preview triangle"></span><span>Üçgen</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="ellipse" aria-label="Bağlantı"><span class="shape-preview ellipse"></span><span>Bağlantı</span></button>
+        </div>
+      </details>
+
+      <details class="ae-library" open>
+        <summary>Şekiller <span>⌃</span></summary>
+        <div class="ae-shape-grid ae-shape-grid-compact">
+          <button class="ae-shape" type="button" draggable="true" data-shape="triangle"><span class="shape-preview triangle"></span><span>Üçgen</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="pentagon"><span class="shape-preview pentagon"></span><span>Beşgen</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="hexagon"><span class="shape-preview hexagon"></span><span>Altıgen</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="octagon"><span class="shape-preview octagon"></span><span>Sekizgen</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="plus"><span class="shape-preview text">✚</span><span>Artı</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="cloud"><span class="shape-preview text">☁</span><span>Bulut</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="arrow-right"><span class="shape-preview text">→</span><span>Sağ ok</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="arrow-left"><span class="shape-preview text">←</span><span>Sol ok</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="arrow-up"><span class="shape-preview text">↑</span><span>Yukarı</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="arrow-down"><span class="shape-preview text">↓</span><span>Aşağı</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="star"><span class="shape-preview text">☆</span><span>Yıldız</span></button>
+          <button class="ae-shape" type="button" draggable="true" data-shape="ellipse"><span class="shape-preview ellipse"></span><span>Daire</span></button>
+        </div>
+      </details>
+
+      <section class="ae-saved-section">
+        <div class="ae-palette-head"><h3>Kaydedilen şekiller</h3><button type="button" class="btn btn-ghost ae-icon-btn" id="ae-save-shape" aria-label="Seçili şekli kaydet">＋</button></div>
+        <div id="ae-saved-shapes" class="ae-shape-grid ae-shape-grid-compact"><p class="text-small text-muted ae-empty-saved">Henüz kayıt yok</p></div>
+      </section>
+
+      <button type="button" class="btn btn-block ae-more-shapes" id="ae-more-shapes">Daha fazla şekil <span>＋</span></button>
+      <button type="button" class="btn btn-ghost btn-block ae-import-data" id="ae-import-data">Veri içe aktar <span>→</span></button>
+      <div class="ae-shortcuts text-small text-muted">
+        <strong>Kısayollar</strong><span>Çift tık: yazıyı değiştir</span><span>Delete: sil</span><span>Ctrl+D: çoğalt</span><span>Boşluk + sürükle: tuvali taşı</span>
+      </div>
+    </aside>
+    <div id="ae-palette-resizer" class="ae-palette-resizer" role="separator" aria-label="Şekil paneli genişliği" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="420" aria-valuenow="272" tabindex="0" title="Panel genişliğini ayarlamak için sürükle; çift tıkla sıfırla"></div>
+
+    <main class="ae-stage-wrap">
+      <div id="ae-canvas-shell" class="ae-canvas-shell" tabindex="0" aria-label="Diyagram tuvali">
+        <svg id="ae-canvas" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ae-svg-title ae-svg-desc">
+          <title id="ae-svg-title">Robot projesi akış diyagramı</title>
+          <desc id="ae-svg-desc">Düzenlenebilir kutular ve bağlantı oklarından oluşan diyagram.</desc>
+          <defs>
+            <pattern id="ae-minor-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path id="ae-grid-minor-path" d="M 20 0 L 0 0 0 20" class="ae-grid-minor"></path></pattern>
+            <pattern id="ae-medium-grid" width="100" height="100" patternUnits="userSpaceOnUse"><rect id="ae-medium-grid-fill" width="100" height="100" fill="url(#ae-minor-grid)"></rect><path id="ae-grid-medium-path" d="M 100 0 L 0 0 0 100" class="ae-grid-medium"></path></pattern>
+            <pattern id="ae-major-grid" width="500" height="500" patternUnits="userSpaceOnUse"><rect id="ae-major-grid-fill" width="500" height="500" fill="url(#ae-medium-grid)"></rect><path id="ae-grid-major-path" d="M 500 0 L 0 0 0 500" class="ae-grid-major"></path></pattern>
+            <marker id="ae-marker-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="context-stroke"></path></marker>
+            <marker id="ae-marker-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.5"></path></marker>
+            <marker id="ae-marker-triangle" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="context-stroke" stroke="context-stroke"></path></marker>
+            <marker id="ae-marker-diamond" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M1 6 L6 1 L11 6 L6 11 Z" fill="var(--ae-canvas)" stroke="context-stroke" stroke-width="1.5"></path></marker>
+            <marker id="ae-marker-circle" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><circle cx="6" cy="6" r="4.5" fill="var(--ae-canvas)" stroke="context-stroke" stroke-width="1.5"></circle></marker>
+            <marker id="ae-marker-bar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M5 0 V10" stroke="context-stroke" stroke-width="2"></path></marker>
+          </defs>
+          <g id="ae-viewport">
+            <rect id="ae-grid" x="-100000" y="-100000" width="200000" height="200000" fill="url(#ae-major-grid)"></rect>
+            <g id="ae-edges"></g><g id="ae-nodes"></g><g id="ae-overlay"></g>
+          </g>
+        </svg>
+        <button type="button" class="btn ae-open-palette" id="ae-open-palette" aria-expanded="false" title="Şekil panelini aç (Ctrl+Shift+B)"><span class="ae-glyph" aria-hidden="true">◇</span> Şekiller</button>
+        <div id="ae-connect-hint" class="ae-connect-hint" hidden>İlk kutuyu seç</div>
+        <div class="ae-canvas-controls">
+          <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-zoom-out" aria-label="Uzaklaştır">−</button>
+          <button type="button" class="btn btn-ghost ae-zoom-label" id="ae-zoom-label" aria-label="Yakınlaştırmayı sıfırla">100%</button>
+          <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-zoom-in" aria-label="Yakınlaştır">＋</button>
+          <button type="button" class="btn btn-ghost ae-icon-btn" id="ae-fit" aria-label="Diyagramı sığdır">⛶</button>
+        </div>
+        <div id="ae-status" class="ae-status text-small">Hazır</div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="ae-export-dialog">
+    <form method="dialog">
+      <div class="ae-dialog-head"><h2>Dışa aktar</h2><button type="submit" class="btn btn-ghost ae-icon-btn" aria-label="Kapat">×</button></div>
+      <p class="text-muted">Diyagramı sunuma veya rapora eklemek için seç.</p>
+      <div class="ae-export-options">
+        <button type="button" class="btn" id="ae-export-svg"><span class="ae-glyph">&lt;&gt;</span> SVG indir</button>
+        <button type="button" class="btn btn-primary" id="ae-export-png"><span class="ae-glyph">▧</span> PNG indir</button>
+      </div>
+    </form>
+  </dialog>
+</div>
+<script src="renderer.js"></script>
+</body>
+</html>

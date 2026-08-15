@@ -1,0 +1,16 @@
+{
+  "name": "akis-studio",
+  "version": "1.3.0",
+  "description": "Lucidchart benzeri çevrimdışı masaüstü diyagram editörü",
+  "author": "Enes Can Çelik",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "devDependencies": {
+    "electron": "43.4.0"
+  }
+}

@@ -1,0 +1,1139 @@
+:root {
+  color-scheme: light;
+  --background: #eef2f7;
+  --foreground: #172033;
+  --muted-foreground: #6f7785;
+  --card: rgb(255 255 255 / 78%);
+  --popover: rgb(255 255 255 / 90%);
+  --canvas: #f8fafc;
+  --primary: #309cff;
+  --primary-foreground: #ffffff;
+  --accent: #e7f3ff;
+  --accent-foreground: #176dbd;
+  --border: rgb(34 52 75 / 14%);
+  --input: rgb(34 52 75 / 18%);
+  --ring: rgb(48 156 255 / 55%);
+  --danger: #d94b45;
+  --glass: rgb(255 255 255 / 70%);
+  --glass-strong: rgb(255 255 255 / 88%);
+  --glass-edge: rgb(255 255 255 / 80%);
+  --glass-shadow: rgb(36 65 101 / 16%);
+  --grid-minor: rgb(45 76 116 / 32%);
+  --grid-medium: rgb(38 70 112 / 48%);
+  --grid-major: rgb(28 58 101 / 68%);
+  --font: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #111620;
+  --foreground: #edf3fb;
+  --muted-foreground: #929dab;
+  --card: rgb(27 34 46 / 78%);
+  --popover: rgb(29 37 50 / 92%);
+  --canvas: #151b25;
+  --primary: #83c3ff;
+  --primary-foreground: #0d1823;
+  --accent: #173550;
+  --accent-foreground: #a9d6ff;
+  --border: rgb(255 255 255 / 12%);
+  --input: rgb(255 255 255 / 16%);
+  --ring: rgb(131 195 255 / 60%);
+  --danger: #ff7f78;
+  --glass: rgb(22 27 36 / 72%);
+  --glass-strong: rgb(25 31 42 / 90%);
+  --glass-edge: rgb(255 255 255 / 13%);
+  --glass-shadow: rgb(0 0 0 / 34%);
+  --grid-minor: rgb(185 210 242 / 27%);
+  --grid-medium: rgb(190 216 248 / 45%);
+  --grid-major: rgb(204 225 252 / 66%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --background: #111620;
+    --foreground: #edf3fb;
+    --muted-foreground: #929dab;
+    --card: rgb(27 34 46 / 78%);
+    --popover: rgb(29 37 50 / 92%);
+    --canvas: #151b25;
+    --primary: #83c3ff;
+    --primary-foreground: #0d1823;
+    --accent: #173550;
+    --accent-foreground: #a9d6ff;
+    --border: rgb(255 255 255 / 12%);
+    --input: rgb(255 255 255 / 16%);
+    --ring: rgb(131 195 255 / 60%);
+    --danger: #ff7f78;
+    --glass: rgb(22 27 36 / 72%);
+    --glass-strong: rgb(25 31 42 / 90%);
+    --glass-edge: rgb(255 255 255 / 13%);
+    --glass-shadow: rgb(0 0 0 / 34%);
+    --grid-minor: rgb(185 210 242 / 27%);
+    --grid-medium: rgb(190 216 248 / 45%);
+    --grid-major: rgb(204 225 252 / 66%);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+button,
+input,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+}
+
+button,
+summary,
+select,
+input[type="color"],
+input[type="checkbox"] {
+  -webkit-app-region: no-drag;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.text-small {
+  font-size: 12px;
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.btn,
+.form-control,
+.form-select {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  outline: none;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  transition: border-color 120ms ease, background 120ms ease,
+    box-shadow 120ms ease, color 120ms ease;
+}
+
+.form-control,
+.form-select {
+  padding: 6px 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  color: var(--primary-foreground);
+  background: color-mix(in srgb, var(--primary) 86%, #1263b0);
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.ae-icon-btn {
+  width: 34px;
+  min-width: 34px;
+  padding-inline: 6px;
+}
+
+.ae-glyph {
+  display: inline-grid;
+  min-width: 16px;
+  place-items: center;
+  line-height: 1;
+}
+
+.form-label {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.form-label .form-control,
+.form-label .form-select {
+  margin-top: 5px;
+}
+
+.form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 34px;
+  height: 20px;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.form-check-input::before {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 24%);
+  content: "";
+  transition: transform 120ms ease;
+}
+
+.form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-check-input:checked::before {
+  transform: translateX(14px);
+}
+
+#akis-studio {
+  --ae-palette-width: 272px;
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% -12%, rgb(48 156 255 / 13%), transparent 31%),
+    radial-gradient(circle at 94% 8%, rgb(124 92 255 / 9%), transparent 28%),
+    var(--background);
+  user-select: none;
+}
+
+#akis-studio .ae-topbar,
+#akis-studio .ae-formatbar,
+#akis-studio .ae-palette {
+  border-color: var(--glass-edge);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 10%), transparent 44%),
+    var(--glass);
+  box-shadow: 0 8px 28px var(--glass-shadow),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(18px) saturate(155%);
+}
+
+#akis-studio .ae-topbar {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--glass-edge);
+}
+
+#akis-studio .ae-brand {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+#akis-studio .ae-logo {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--primary-foreground);
+  background: linear-gradient(145deg, #45a9ff, #258ce9);
+  box-shadow: 0 5px 14px rgb(48 156 255 / 28%);
+  font-weight: 700;
+}
+
+#akis-studio .ae-doc-name {
+  width: clamp(120px, 14vw, 210px);
+  min-width: 120px;
+  flex: 0 1 210px;
+}
+
+#akis-studio .ae-save-state {
+  min-width: 0;
+  flex: 1 1 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#akis-studio .ae-top-actions {
+  display: flex;
+  min-width: max-content;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+#akis-studio .ae-top-actions .btn {
+  padding-inline: 9px;
+}
+
+#akis-studio .ae-theme-control,
+#akis-studio .ae-color-tool,
+#akis-studio .ae-shape-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#akis-studio .ae-theme-control .form-select {
+  width: 92px;
+}
+
+#akis-studio .ae-formatbar {
+  position: relative;
+  z-index: 25;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: 5px 8px;
+  overflow: visible;
+  border-bottom: 1px solid var(--glass-edge);
+}
+
+#akis-studio .ae-toolgroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+#akis-studio .ae-separator {
+  width: 1px;
+  height: 25px;
+  flex: 0 0 1px;
+  margin-inline: 2px;
+  background: var(--border);
+}
+
+#akis-studio .ae-font-select {
+  width: 116px;
+}
+
+#akis-studio .ae-size-select {
+  width: 72px;
+}
+
+#akis-studio .ae-color-tool {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#akis-studio .ae-color-tool:hover {
+  background: var(--accent);
+}
+
+#akis-studio .ae-color-tool input {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  width: 26px;
+  height: 6px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+#akis-studio .ae-snap {
+  margin-left: 2px;
+  white-space: nowrap;
+}
+
+#akis-studio .ae-dropdown {
+  position: relative;
+}
+
+#akis-studio .ae-dropdown > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+#akis-studio .ae-dropdown > summary::-webkit-details-marker,
+#akis-studio .ae-library > summary::-webkit-details-marker {
+  display: none;
+}
+
+#akis-studio .ae-popover {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 7px);
+  left: 0;
+  display: grid;
+  min-width: 220px;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 12px;
+  color: var(--foreground);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 12%), transparent 45%),
+    var(--glass-strong);
+  box-shadow: 0 14px 34px var(--glass-shadow),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+}
+
+#akis-studio .ae-arrow-popover {
+  right: 0;
+  left: auto;
+  min-width: 250px;
+}
+
+#akis-studio .ae-routing-popover {
+  min-width: 165px;
+}
+
+#akis-studio .ae-routing-popover .btn,
+#akis-studio .ae-line-options .btn {
+  justify-content: flex-start;
+}
+
+#akis-studio .ae-popover-title {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#akis-studio .ae-option-grid,
+#akis-studio .ae-line-options {
+  display: grid;
+  gap: 5px;
+}
+
+#akis-studio .ae-option-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#akis-studio .ae-line-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#akis-studio .ae-line-sample {
+  display: inline-block;
+  width: 40px;
+  height: 2px;
+  background: currentColor;
+}
+
+#akis-studio .ae-line-sample.dashed {
+  background: repeating-linear-gradient(90deg, currentColor 0 8px, transparent 8px 13px);
+}
+
+#akis-studio .ae-line-sample.dotted {
+  background: repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 6px);
+}
+
+#akis-studio .ae-line-sample.dashdot {
+  background: repeating-linear-gradient(90deg, currentColor 0 10px, transparent 10px 14px, currentColor 14px 16px, transparent 16px 21px);
+}
+
+#akis-studio .ae-popover-field {
+  display: grid;
+  grid-template-columns: 1fr 72px;
+  align-items: center;
+  gap: 10px;
+}
+
+#akis-studio .ae-body {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: var(--ae-palette-width) minmax(0, 1fr);
+  overflow: hidden;
+  transition: grid-template-columns 180ms cubic-bezier(.2, .8, .2, 1);
+}
+
+#akis-studio.palette-resizing .ae-body {
+  cursor: col-resize;
+  transition: none;
+}
+
+#akis-studio.palette-collapsed .ae-body {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+#akis-studio .ae-palette {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 10px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  border-right: 1px solid var(--glass-edge);
+  scrollbar-color: color-mix(in srgb, var(--foreground) 34%, transparent) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  transition: opacity 150ms ease, transform 180ms cubic-bezier(.2, .8, .2, 1), padding 180ms ease;
+}
+
+#akis-studio .ae-palette::-webkit-scrollbar {
+  width: 10px;
+}
+
+#akis-studio .ae-palette::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#akis-studio .ae-palette::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 34%, transparent);
+  background-clip: padding-box;
+}
+
+#akis-studio .ae-palette::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 52%, transparent);
+  background-clip: padding-box;
+}
+
+#akis-studio.palette-collapsed .ae-palette {
+  opacity: 0;
+  transform: translateX(-18px);
+  padding: 0;
+  pointer-events: none;
+}
+
+#akis-studio .ae-palette-resizer {
+  position: absolute;
+  z-index: 12;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--ae-palette-width) - 5px);
+  width: 10px;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+#akis-studio .ae-palette-resizer::after {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 4px;
+  width: 2px;
+  border-radius: 999px;
+  background: transparent;
+  content: "";
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+#akis-studio .ae-palette-resizer:is(:hover, :focus-visible)::after,
+#akis-studio.palette-resizing .ae-palette-resizer::after {
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+#akis-studio.palette-collapsed .ae-palette-resizer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#akis-studio .ae-palette-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#akis-studio .ae-palette h2,
+#akis-studio .ae-dialog-head h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+#akis-studio .ae-palette h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+#akis-studio .ae-shape-search {
+  position: relative;
+  width: 100%;
+  margin-top: 8px;
+}
+
+#akis-studio .ae-shape-search > span {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  color: var(--muted-foreground);
+}
+
+#akis-studio .ae-shape-search input {
+  width: 100%;
+  padding-left: 30px;
+}
+
+#akis-studio .ae-palette-section,
+#akis-studio .ae-library,
+#akis-studio .ae-saved-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+#akis-studio .ae-palette-section > h3 {
+  margin-bottom: 8px;
+}
+
+#akis-studio .ae-library > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 650;
+  cursor: pointer;
+  list-style: none;
+}
+
+#akis-studio .ae-library:not([open]) > summary span {
+  transform: rotate(180deg);
+}
+
+#akis-studio .ae-shape-grid,
+#akis-studio .ae-shape-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 52px);
+  justify-content: start;
+  align-items: start;
+  gap: 7px 6px;
+}
+
+#akis-studio .ae-shape {
+  appearance: none;
+  display: flex;
+  width: 52px;
+  min-width: 52px;
+  max-width: 52px;
+  height: 62px;
+  min-height: 62px;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 2px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--foreground);
+  background: transparent;
+  cursor: grab;
+}
+
+#akis-studio .ae-shape[hidden] {
+  display: none;
+}
+
+#akis-studio .ae-shape:hover {
+  border-color: color-mix(in srgb, var(--primary) 22%, var(--border));
+  color: var(--accent-foreground);
+  background: color-mix(in srgb, var(--accent) 78%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 24%);
+}
+
+#akis-studio .ae-shape:active {
+  cursor: grabbing;
+}
+
+#akis-studio .ae-shape > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#akis-studio .shape-preview {
+  position: relative;
+  display: block;
+  width: 36px;
+  min-width: 36px;
+  height: 25px;
+  min-height: 25px;
+  border: 1.5px solid currentColor;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+}
+
+#akis-studio .shape-preview.rounded,
+#akis-studio .shape-preview.terminator {
+  border-radius: 999px;
+}
+
+#akis-studio .shape-preview.ellipse {
+  border-radius: 50%;
+}
+
+#akis-studio .shape-preview.diamond {
+  width: 28px;
+  min-width: 28px;
+  transform: rotate(45deg) scale(.72);
+}
+
+#akis-studio .shape-preview.parallelogram {
+  transform: skew(-16deg);
+}
+
+#akis-studio .shape-preview.document {
+  border-radius: 0 0 45% 0;
+}
+
+#akis-studio .shape-preview.cylinder {
+  border-radius: 50% / 18%;
+}
+
+#akis-studio .shape-preview.note {
+  clip-path: polygon(0 0, 76% 0, 100% 25%, 100% 100%, 0 100%);
+}
+
+#akis-studio .shape-preview.predefined::before,
+#akis-studio .shape-preview.predefined::after {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: currentColor;
+  content: "";
+}
+
+#akis-studio .shape-preview.predefined::before {
+  left: 6px;
+}
+
+#akis-studio .shape-preview.predefined::after {
+  right: 6px;
+}
+
+#akis-studio .shape-preview.hexagon {
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+#akis-studio .shape-preview.trapezoid {
+  clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+}
+
+#akis-studio .shape-preview.triangle {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+#akis-studio .shape-preview.pentagon {
+  clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+}
+
+#akis-studio .shape-preview.octagon {
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+
+#akis-studio .shape-preview.delay {
+  border-radius: 0 50% 50% 0;
+}
+
+#akis-studio .shape-preview.text,
+#akis-studio .shape-preview.arrow-right,
+#akis-studio .shape-preview.table-shape {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+}
+
+#akis-studio .ae-empty-saved {
+  grid-column: 1 / -1;
+  padding: 8px 0;
+}
+
+#akis-studio .ae-more-shapes,
+#akis-studio .ae-import-data {
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+#akis-studio .ae-more-shapes {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+#akis-studio .ae-shortcuts {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+#akis-studio .ae-stage-wrap {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+#akis-studio .ae-canvas-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  outline: none;
+  background:
+    radial-gradient(circle at 16% 2%, rgb(48 156 255 / 5%), transparent 34%),
+    radial-gradient(circle at 82% 94%, rgb(128 100 255 / 5%), transparent 30%),
+    var(--canvas);
+  contain: paint;
+  touch-action: none;
+}
+
+#akis-studio .ae-canvas-shell:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+#akis-studio #ae-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+#akis-studio #ae-canvas.is-panning {
+  cursor: grabbing;
+}
+
+#akis-studio #ae-canvas.is-connect {
+  cursor: crosshair;
+}
+
+#akis-studio .ae-grid-minor,
+#akis-studio .ae-grid-medium,
+#akis-studio .ae-grid-major {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+#akis-studio .ae-grid-minor {
+  stroke: var(--grid-minor);
+  stroke-width: .8;
+}
+
+#akis-studio .ae-grid-medium {
+  stroke: var(--grid-medium);
+  stroke-width: 1.15;
+}
+
+#akis-studio .ae-grid-major {
+  stroke: var(--grid-major);
+  stroke-width: 1.55;
+}
+
+#akis-studio .ae-edge {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+#akis-studio .ae-edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+#akis-studio .ae-edge.selected {
+  stroke: var(--primary);
+  stroke-width: 3;
+}
+
+#akis-studio .ae-node {
+  cursor: move;
+}
+
+#akis-studio .ae-node-shape {
+  vector-effect: non-scaling-stroke;
+}
+
+#akis-studio .ae-node-text {
+  dominant-baseline: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+#akis-studio .ae-selection {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+#akis-studio .ae-port {
+  fill: var(--primary);
+  stroke: var(--primary-foreground);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  cursor: crosshair;
+}
+
+#akis-studio .ae-resize {
+  fill: var(--card);
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  cursor: nwse-resize;
+}
+
+#akis-studio .ae-temp-edge {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-dasharray: 7 4;
+  vector-effect: non-scaling-stroke;
+}
+
+#akis-studio .ae-canvas-controls,
+#akis-studio .ae-status,
+#akis-studio .ae-connect-hint,
+#akis-studio .ae-open-palette {
+  position: absolute;
+  z-index: 3;
+  border: 1px solid var(--glass-edge);
+  border-radius: 12px;
+  color: var(--foreground);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 12%), transparent 45%),
+    var(--glass-strong);
+  box-shadow: 0 14px 34px var(--glass-shadow),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+}
+
+#akis-studio .ae-canvas-controls {
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 4px;
+}
+
+#akis-studio .ae-zoom-label {
+  min-width: 62px;
+}
+
+#akis-studio .ae-status {
+  bottom: 12px;
+  left: 12px;
+  padding: 7px 10px;
+}
+
+#akis-studio .ae-connect-hint {
+  top: 12px;
+  left: 50%;
+  padding: 8px 12px;
+  transform: translateX(-50%);
+}
+
+#akis-studio .ae-open-palette {
+  top: 12px;
+  left: 12px;
+  display: none;
+}
+
+#akis-studio.palette-collapsed .ae-open-palette {
+  display: inline-flex;
+}
+
+#akis-studio .ae-inline-text-editor {
+  position: absolute;
+  z-index: 40;
+  min-width: 120px;
+  min-height: 48px;
+  resize: none;
+  padding: 8px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  outline: none;
+  color: var(--foreground);
+  background: var(--glass-strong);
+  box-shadow: 0 10px 28px var(--glass-shadow), 0 0 0 3px var(--ring);
+  line-height: 1.18;
+  overflow: auto;
+  user-select: text;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+#akis-studio dialog {
+  min-width: min(420px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  color: var(--foreground);
+  background: var(--glass-strong);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 25%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  backdrop-filter: blur(22px) saturate(165%);
+}
+
+#akis-studio dialog::backdrop {
+  background: rgb(7 12 20 / 34%);
+  backdrop-filter: blur(2px);
+}
+
+#akis-studio dialog form {
+  padding: 18px;
+}
+
+#akis-studio .ae-dialog-head,
+#akis-studio .ae-export-options {
+  display: flex;
+  align-items: center;
+}
+
+#akis-studio .ae-dialog-head {
+  justify-content: space-between;
+}
+
+#akis-studio .ae-export-options {
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+@media (max-width: 1680px) {
+  #akis-studio .ae-save-state {
+    display: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  #akis-studio .ae-topbar {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  #akis-studio .ae-top-actions {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    padding-bottom: 2px;
+    overflow-x: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
